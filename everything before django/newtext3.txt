@@ -1,0 +1,152 @@
+My notes July 13, 2020
+
+I am unsure of how views.py or tests.py work. 
+
+Now there's a models.py
+
+I learned how to start a project. 
+
+The command:
+
+django-admin startproject romels-website
+
+The command for start app:
+
+python manage.py
+
+--what's actually in manage.py
+
+-- anyways, moving forward
+
+To Write Your First View:
+
+open the file polls/views.py and put the following
+
+
+
+--- --- ---
+from django.http import HttpResponse
+
+def index(request):
+	return HttpResponse("Hello, world. You're at polls index.")
+--- --- ---
+
+
+
+now create a urls.py file in the directory
+
+in the polls/urls.py file include the following code:
+
+
+
+--- --- ---
+from django.urls import path
+
+from . import views
+
+urlpatterns = [
+	path('', views.index, name="index")
+]
+--- --- --- 
+
+
+
+That's how you create a URLconf
+
+romels-website should have an import for django.urls.include and insert an include() in the urlpatterns list, so you have
+
+
+
+--- --- --- 
+from django.urls import include, path
+
+urlpatterns = [
+	path('polls/', include('polls.urls'))
+]
+--- --- ---
+
+
+
+The include() function allows referencying other URLconfs.
+
+A model is the single, definitive source of truth about your data. It contains the essential fields and behaviors of the data you're storing. Django follows the DRY Principle. The goal is to define your data model in one place and automatically derive things from it. 
+
+This includes the migrations - unlike in Ruby on Rails, for example, migrations are entirely derived from your models file, and are essentially a history that Django can roll through to update your database schema to match your current models.
+
+-
+
+In our poll app, we'll create two models: Question and Choice. A Question has a question and a publication data. A choice has two fields: the text of the choice and vote tally. Each Choice is associated with a Question. 
+
+-
+
+These concepts are represented by Python classes. Edit the polls/models.py file so it looks like this
+
+-
+polls/models.py
+-
+
+
+
+--- --- ---
+from django.db import models
+
+class Question(models.Model):
+	question_text = models.CharField(max_length=200)
+	pub_date = models.DateTimeField('date published')
+
+class Choice(models.Model):
+	question = models.ForeignKey(Question, on_delete=models.CASCADE)
+	choice_text = models.CharField(max_length = 200)
+	votes = models.IntegerField(default=0)
+
+-
+
+Django supports all the common databse relationships: many-to-one, many-to-many, and one-to-one
+
+-
+
+First we need to tell our Project that the polls app is installed.
+
+-
+
+Philosophy:
+Django apps are "pluggable": You can use an app in multiple projects, and you can distribute apps, because they don't have to be tied to a given Django installation.
+
+- 
+
+To include the app in our project, we need to add a reference to its configuration class in the INSTALLED_APPS setting. The PollsConfig class is in the polls/apps.py file, so its dotted path is 'polls.apps.PollsConfig' . Edit the mysite/settings.py file and add that dotted path to the INSTALLED_APPS setting. It'll look like this:
+
+-
+romels-website/settings.py
+-
+
+
+
+---	 --- ---
+INSTALLED_APPS = [
+	'polls.apps.PollsConfig'
+	''
+	''
+	''
+	''
+	''
+]
+--- --- ---
+
+
+
+-
+
+Now Django knows to include the polls app. Let's run another command:
+
+$ python manage.py makemigrations polls
+
+You should see something similar to the follow:
+
+Migrations for 'polls':
+	polls/migrations/0001_initial.py
+		- Create model Question
+		- Create model Choice
+
+By running makemigrations, you're telling Django that you've made some changes to your models (in this case, you've made new ones) and that you'd like the changes to be stored as a migration.
+
